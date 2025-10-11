@@ -1,4 +1,6 @@
-Release/*
-Debug/*
 .gitignore/*
 .git/*
+.vscode/
+ASTCreate
+*.wav
+*.ast

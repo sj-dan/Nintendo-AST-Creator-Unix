@@ -1,6 +1,8 @@
 /**
  * Written by Gregory Heskett (gheskett)
  *
+ * Modified by DanChan (sj-dan) for Unix compatibility
+ *
  * This is a command line tool intended to convert audio into a lossless encoding of the Nintendo AST format found in games such as Super Mario Galaxy and Mario Kart: Double Dash.
  * The resulting audio file is also compatible with lossy interpretations of AST as seen in The Legend of Zelda: Twilight Princess.
  *
@@ -31,13 +33,17 @@
  */
 
 
-#include "stdafx.h"
+#include <cstdint>
+#include <cstring>
 #include <string>
-#include <intrin.h>
+#include <byteswap.h>
 #include <stdio.h>
-#include <windows.h>
+#include <sys/stat.h>
 
 using namespace std;
+
+#define _byteswap_ushort(x) bswap_16(x)
+#define _byteswap_ulong(x) bswap_32(x)
 
 string help; // Stores help text
 string shortFilename; // Shortened filename used with help text
@@ -412,9 +418,9 @@ int ASTInfo::writeAST(FILE *sourceWAV)
 	string tmp = "";
 	if (this->filename.length() >= 4)
 		tmp = this->filename.substr(this->filename.length() - 4, this->filename.length());
-	if (_strcmpi(tmp.c_str(), ".ast") != 0)
+	if (strcmp(tmp.c_str(), ".ast") != 0)
 		this->filename += ".ast";
-	if (_strcmpi(this->filename.c_str(), ".ast") == 0) {
+	if (strcmp(this->filename.c_str(), ".ast") == 0) {
 		printf("ERROR: Output filename can not be restricted exclusively to .ast extension!\n\n%s", help.c_str());
 		return 1;
 	}
@@ -442,7 +448,7 @@ int ASTInfo::writeAST(FILE *sourceWAV)
 	// Creates directory if needed
 	if (this->filename.find("\\") != string::npos || this->filename.find("/") != string::npos) {
 		int size = this->filename.find_last_of("/\\");
-		CreateDirectory(this->filename.substr(0, size+1).c_str(), NULL);
+		mkdir(this->filename.substr(0, size+1).c_str(), 0755);
 	}
 
 	// Creates AST file
